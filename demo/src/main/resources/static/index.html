@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador de Árboles</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        h1 { margin-top: 0; }
+        .menu-arboles { margin-bottom: 12px; }
+        .menu-arboles button { font-size: 1em; margin-right: 4px; cursor: pointer; }
+        .menu-arboles button.active { font-weight: bold; }
+        input, button { font-size: 1em; margin: 0.2em; }
+        #arbol { white-space: pre; font-family: monospace; background: #eee; padding: 1em; border-radius: 8px; }
+        #explicacion { margin-top: 1em; font-weight: bold; }
+        #svg-container { margin-top: 2em; }
+    </style>
+</head>
+<body>
+    <h1>Simulador de Árbol Binario</h1>
+    <div class="menu-arboles">
+        <button id="btn-arbol" onclick="cambiarArbol('arbol')">Árbol Binario</button>
+        <button id="btn-avl" onclick="cambiarArbol('arbol-avl')">Árbol AVL</button>
+        <button id="btn-splay" onclick="cambiarArbol('arbol-splay')">Splay Tree</button>
+        <button id="btn-b" onclick="cambiarArbol('arbol-b')">Árbol B</button>
+    </div>
+    <input id="valor" type="number" placeholder="Valor">
+    <button onclick="insertar()">Insertar</button>
+    <button onclick="eliminar()">Eliminar</button>
+    <div id="explicacion"></div>
+    <div id="arbol"></div>
+    <div id="svg-container">
+        <svg id="arbol-svg" width="800" height="320"></svg>
+    </div>
+
+<script>
+let endpointBase = '/arbol';
+let tipoArbol = 'arbol';
+
+function cambiarArbol(nombre) {
+    tipoArbol = nombre;
+    endpointBase = '/' + nombre;
+    document.querySelectorAll('.menu-arboles button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('btn-' + (nombre === 'arbol' ? 'arbol' : nombre.replace('arbol-', ''))).classList.add('active');
+    document.getElementById('valor').value = '';
+    cargarArbol();
+    // Cambia el título según selección
+    let title = "Simulador de ";
+    if(nombre==="arbol") title += "Árbol Binario";
+    else if(nombre==="arbol-avl") title += "Árbol AVL";
+    else if(nombre==="arbol-splay") title += "Splay Tree";
+    else if(nombre==="arbol-b") title += "Árbol B";
+    document.querySelector("h1").innerText = title;
+}
+
+async function insertar() {
+    const valor = document.getElementById('valor').value;
+    if (!valor) return alert("Ingresa un valor");
+    await fetch(endpointBase + '/insertar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({valor: parseInt(valor)})
+    });
+    cargarArbol();
+}
+
+async function eliminar() {
+    const valor = document.getElementById('valor').value;
+    if (!valor) return alert("Ingresa un valor");
+    await fetch(endpointBase + '/eliminar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({valor: parseInt(valor)})
+    });
+    cargarArbol();
+}
+
+async function cargarArbol() {
+    const res = await fetch(endpointBase);
+    const data = await res.json();
+    document.getElementById('explicacion').textContent = data.explicacion;
+    if(tipoArbol==='arbol-b')
+        document.getElementById('arbol').textContent = dibujarTextoB(data.arbol, 0);
+    else
+        document.getElementById('arbol').textContent = dibujarTexto(data.arbol, 0);
+    if(tipoArbol==='arbol-b')
+        dibujarSVGB(data.arbol);
+    else
+        dibujarSVG(data.arbol, tipoArbol);
+}
+
+// Binario, AVL, Splay
+function dibujarTexto(nodo, nivel) {
+    if (!nodo) return "";
+    let texto = "";
+    texto += " ".repeat(nivel * 4) + nodo.valor + "\n";
+    if (nodo.izquierdo) texto += dibujarTexto(nodo.izquierdo, nivel + 1);
+    if (nodo.derecho) texto += dibujarTexto(nodo.derecho, nivel + 1);
+    return texto;
+}
+
+// Árbol B
+function dibujarTextoB(nodo, nivel) {
+    if (!nodo) return "";
+    let texto = "";
+    texto += " ".repeat(nivel * 4) + "[" + (nodo.claves || []).join(",") + "]\n";
+    if (nodo.hijos) {
+        nodo.hijos.forEach(h => texto += dibujarTextoB(h, nivel + 1));
+    }
+    return texto;
+}
+
+// ==============================
+// Mejorado: Sin nodos chocando
+// ==============================
+function dibujarSVG(arbol, tipo) {
+    const svg = document.getElementById('arbol-svg');
+    svg.innerHTML = '';
+    if (!arbol) return;
+
+    // 1. Contar cuántos nodos hay en cada nivel
+    let niveles = [];
+    function contarNiveles(nodo, depth) {
+        if (!nodo) return;
+        if (!niveles[depth]) niveles[depth] = 0;
+        niveles[depth]++;
+        contarNiveles(nodo.izquierdo, depth + 1);
+        contarNiveles(nodo.derecho, depth + 1);
+    }
+    contarNiveles(arbol, 0);
+    let maxLevel = niveles.length - 1;
+
+    // 2. Ancho SVG dinámico según el nivel con más nodos
+    let maxNodos = Math.max(...niveles);
+    const espacioNodo = 48;
+    const widthSVG = Math.max(800, maxNodos * espacioNodo + 64);
+    const heightSVG = Math.max(320, (maxLevel+2)*90);
+    svg.setAttribute("width", widthSVG);
+    svg.setAttribute("height", heightSVG);
+
+    // 3. Posiciones horizontales por nivel (sin chocar)
+    let posXnivel = Array(niveles.length).fill(0);
+
+    // 4. Segundo recorrido: asignar x/y
+    const nodes = [];
+    const edges = [];
+    function traverse(nodo, level, parent) {
+        if (!nodo) return;
+        const nodosEnNivel = niveles[level];
+        const x = ((widthSVG - 48) / (nodosEnNivel + 1)) * (posXnivel[level] + 1) + 24;
+        const y = 50 + level * 90;
+        nodes.push({valor: nodo.valor, x, y});
+        if (parent) {
+            edges.push({x1: parent.x, y1: parent.y, x2: x, y2: y});
+        }
+        posXnivel[level]++;
+        traverse(nodo.izquierdo, level + 1, {x, y});
+        traverse(nodo.derecho, level + 1, {x, y});
+    }
+    posXnivel = Array(niveles.length).fill(0);
+    traverse(arbol, 0, null);
+
+    edges.forEach(e => {
+        const linea = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        linea.setAttribute("x1", e.x1);
+        linea.setAttribute("y1", e.y1);
+        linea.setAttribute("x2", e.x2);
+        linea.setAttribute("y2", e.y2);
+        linea.setAttribute("stroke", "#888");
+        linea.setAttribute("stroke-width", "2");
+        svg.appendChild(linea);
+    });
+    nodes.forEach(n => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", n.x);
+        circle.setAttribute("cy", n.y);
+        circle.setAttribute("r", 18);
+        let fill = "#4ea4ff";
+        if (tipo === 'arbol-avl') fill = "#47cf73";
+        if (tipo === 'arbol-splay') fill = "#f7903c";
+        circle.setAttribute("fill", fill);
+        circle.setAttribute("stroke", "#222");
+        circle.setAttribute("stroke-width", "2");
+        svg.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", n.x);
+        text.setAttribute("y", n.y + 6);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-size", "16px");
+        text.setAttribute("fill", "#fff");
+        text.textContent = n.valor;
+        svg.appendChild(text);
+    });
+}
+
+// =========================================
+// Árbol B: Sin nodos chocando ni solaparse
+// =========================================
+function dibujarSVGB(raiz) {
+    const svg = document.getElementById('arbol-svg');
+    svg.innerHTML = '';
+    if (!raiz) return;
+
+    // 1. Recorrido: contar nodos por nivel
+    let niveles = [];
+    function contarNiveles(nodo, nivel) {
+        if (!nodo) return;
+        if (!niveles[nivel]) niveles[nivel] = 0;
+        niveles[nivel]++;
+        if (nodo.hijos) nodo.hijos.forEach(h=>contarNiveles(h, nivel+1));
+    }
+    contarNiveles(raiz,0);
+
+    let maxLevel = niveles.length-1;
+    let maxNodos = Math.max(...niveles);
+    const boxWidthMin = 48; // Tamaño mínimo nodo B
+    const widthSVG = Math.max(900, maxNodos * boxWidthMin + 100);
+    const heightSVG = Math.max(360, (maxLevel+2)*90);
+    svg.setAttribute("width", widthSVG);
+    svg.setAttribute("height", heightSVG);
+
+    // 2. Recorrido: asignar x/y para cada nodo (en orden de aparición, izquierda a derecha)
+    let posXnivel = Array(niveles.length).fill(0);
+    function place(nodo, nivel) {
+        if (!nodo) return;
+        const nodosEnNivel = niveles[nivel];
+        // Calcula tamaño de este nodo según claves
+        const clavesCount = nodo.claves ? nodo.claves.length : 1;
+        const nodeWidth = Math.max(boxWidthMin, 24 + 29 * clavesCount);
+        const x = ((widthSVG - boxWidthMin) / (nodosEnNivel + 1)) * (posXnivel[nivel] + 1) + 24;
+        const y = 50 + nivel * 90;
+        nodo._x = x;
+        nodo._y = y;
+        nodo._w = nodeWidth;
+        posXnivel[nivel]++;
+        if (nodo.hijos) nodo.hijos.forEach(h=>place(h, nivel+1));
+    }
+    posXnivel = Array(niveles.length).fill(0);
+    place(raiz,0);
+
+    // 3. Dibujar ramas
+    function drawLines(nodo) {
+        if (!nodo || !nodo.hijos) return;
+        nodo.hijos.forEach(h => {
+            if (!h) return;
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute("x1", nodo._x);
+            l.setAttribute("y1", nodo._y + 16);
+            l.setAttribute("x2", h._x);
+            l.setAttribute("y2", h._y - 16);
+            l.setAttribute("stroke", "#e8a036");
+            l.setAttribute("stroke-width", "2");
+            svg.appendChild(l);
+            drawLines(h);
+        });
+    }
+    drawLines(raiz);
+
+    // 4. Dibujar nodos tipo "rectángulo"
+    function drawNodes(nodo) {
+        if (!nodo) return;
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", nodo._x - nodo._w/2);
+        rect.setAttribute("y", nodo._y - 16);
+        rect.setAttribute("rx", 6);
+        rect.setAttribute("ry", 6);
+        rect.setAttribute("width", nodo._w);
+        rect.setAttribute("height", 32);
+        rect.setAttribute("fill", "#ffe8ba");
+        rect.setAttribute("stroke", "#e8a036");
+        rect.setAttribute("stroke-width", "2");
+        svg.appendChild(rect);
+
+        // Dibuja claves
+        (nodo.claves||[]).forEach((clave,i)=>{
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", nodo._x - nodo._w/2 + 14 + i*29);
+            t.setAttribute("y", nodo._y + 6);
+            t.setAttribute("text-anchor", "middle");
+            t.setAttribute("font-size", "14px");
+            t.setAttribute("font-weight", "bold");
+            t.setAttribute("fill", "#c57702");
+            t.textContent = clave;
+            svg.appendChild(t);
+        });
+
+        if(nodo.hijos) nodo.hijos.forEach(drawNodes);
+    }
+    drawNodes(raiz);
+}
+
+window.onload = cargarArbol;
+</script>
+</body>
+</html>
