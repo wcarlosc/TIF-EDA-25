@@ -109,6 +109,21 @@ public class ArbolSplay {
             return temp;
         }
     }
+    public boolean buscar(int key) {
+        if (raiz == null) {
+            explicacion.append("El árbol está vacío.\n");
+            return false;
+        }
+        raiz = splay(raiz, key);
+        if (raiz.valor == key) {
+            explicacion.append("Valor encontrado: ").append(key).append("\n");
+            return true;
+        } else {
+            explicacion.append("Valor no encontrado: ").append(key).append("\n");
+            return false;
+        }
+    }
+
 
     // Convertir árbol a Map para JSON
     public Map<String, Object> toMap(NodoSplay n) {

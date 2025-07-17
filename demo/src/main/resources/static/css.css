@@ -1,0 +1,224 @@
+/* nuevo-estilo.css */
+
+/* Variables de diseño */
+:root {
+  --bg-dark: #1e1e2f;
+  --panel-dark: #292942;
+  --accent1: #00c6ff;
+  --accent2: #0072ff;
+  --accent3: #ff4e50;
+  --accent4: #f9d423;
+  --white: #f5f5f5;
+  --grey-light: #ccc;
+  --border-radius: 12px;
+  --shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  --transition: 0.4s ease;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Cuerpo */
+body {
+  background: var(--bg-dark);
+  color: var(--white);
+  min-height: 100vh;
+  padding: 2rem;
+  transition: background var(--transition);
+  animation: fadeInBody 1s ease-out;
+}
+
+/* Títulos */
+h1 {
+  font-size: 3rem;
+  text-align: center;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 2rem;
+  animation: slideDown 0.8s ease-out;
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 1rem;
+}
+
+/* Menú */
+.menu-arboles {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.menu-arboles button {
+  padding: 0.9rem 1.7rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-arboles button:hover {
+  transform: scale(1.05) rotate(-1deg);
+  background: linear-gradient(135deg, var(--accent2), var(--accent1));
+}
+
+.menu-arboles button.active {
+  animation: pulse 1.2s infinite;
+  background: linear-gradient(135deg, var(--accent4), var(--accent3));
+}
+
+/* Controles */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+input[type="number"] {
+  padding: 0.7rem 1rem;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--accent1);
+  background: var(--panel-dark);
+  color: var(--white);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent2);
+  box-shadow: 0 0 8px var(--accent2);
+}
+
+/* Botones generales */
+button {
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.8rem 1.4rem;
+  font-weight: 600;
+  color: white;
+  background: var(--accent3);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+button:hover {
+  transform: scale(1.05);
+  background: var(--accent4);
+}
+
+/* Área de explicación */
+#explicacion {
+    
+  background: var(--panel-dark);
+  border-left: 5px solid var(--accent1);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  white-space: pre-wrap;
+  animation: fadeInUp 1s ease;
+}
+
+/* Visualización */
+.tree-container {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+#arbol, #svg-container {
+  flex: 1;
+  min-width: 300px;
+  padding: 1rem;
+  background: var(--panel-dark);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  animation: fadeInUp 1s ease;
+}
+
+/* SVG */
+#arbol-svg {
+  display: block;
+  margin: auto;
+}
+
+circle {
+  transition: fill 0.3s ease, transform 0.3s ease;
+  fill: var(--accent2);
+}
+
+circle:hover {
+  transform: scale(1.15);
+  fill: var(--accent4);
+  cursor: pointer;
+}
+
+text {
+  fill: white;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+line {
+  stroke: var(--accent1);
+  stroke-width: 2px;
+}
+
+/* Animaciones */
+@keyframes fadeInBody {
+  0% { opacity: 0; background-color: #000; }
+  100% { opacity: 1; background-color: var(--bg-dark); }
+}
+
+@keyframes slideDown {
+  0% { transform: translateY(-40px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tree-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  input[type="number"] {
+    width: 100%;
+  }
+}

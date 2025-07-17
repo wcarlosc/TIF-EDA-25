@@ -115,6 +115,23 @@ public class ArbolAVL {
         }
         return nodo;
     }
+    public boolean buscar(NodoAVL nodo, int valor) {
+        if (nodo == null) {
+            explicacion.append("No se encontró el valor ").append(valor).append("\\n");
+            return false;
+        }
+        if (valor == nodo.valor) {
+            explicacion.append("Valor encontrado: ").append(valor).append("\\n");
+            return true;
+        } else if (valor < nodo.valor) {
+            explicacion.append("Buscando en el subárbol izquierdo de ").append(nodo.valor).append("\\n");
+            return buscar(nodo.izquierdo, valor);
+        } else {
+            explicacion.append("Buscando en el subárbol derecho de ").append(nodo.valor).append("\\n");
+            return buscar(nodo.derecho, valor);
+        }
+    }
+
 
     public NodoAVL minValorNodo(NodoAVL nodo) {
         NodoAVL actual = nodo;
@@ -131,5 +148,8 @@ public class ArbolAVL {
         map.put("izquierdo", toMap(n.izquierdo));
         map.put("derecho", toMap(n.derecho));
         return map;
+    }
+    public String getExplicacion() {
+        return explicacion.toString();
     }
 }

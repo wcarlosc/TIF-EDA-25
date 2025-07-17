@@ -176,4 +176,25 @@ public class ArbolB {
         map.put("hijos", hijos);
         return map;
     }
+    public boolean buscar(NodoB nodo, int k) {
+        if (nodo == null) return false;
+
+        int i = 0;
+        while (i < nodo.claves.size() && k > nodo.claves.get(i)) {
+            i++;
+        }
+
+        if (i < nodo.claves.size() && k == nodo.claves.get(i)) {
+            explicacion.append("Valor encontrado: ").append(k).append("\\n");
+            return true;
+        }
+
+        if (nodo.hoja) {
+            explicacion.append("Valor no encontrado: ").append(k).append("\\n");
+            return false;
+        }
+
+        return buscar(nodo.hijos.get(i), k);
+    }
+
 }

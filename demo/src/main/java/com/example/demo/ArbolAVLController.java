@@ -6,9 +6,10 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/arbol-avl")
+
 @CrossOrigin // Permite llamadas desde tu frontend local
 public class ArbolAVLController {
-    private final ArbolAVL arbol = new ArbolAVL();
+    private ArbolAVL arbol = new ArbolAVL();
 
     @PostMapping("/insertar")
     public Map<String, Object> insertar(@RequestBody Map<String, Integer> body) {
@@ -33,4 +34,27 @@ public class ArbolAVLController {
         response.put("explicacion", arbol.explicacion.toString().replace("\\n", "\n"));
         return response;
     }
+    @GetMapping("/buscar/{valor}")
+    public Map<String, Object> buscar(@PathVariable int valor) {
+        arbol.explicacion = new StringBuilder();
+        boolean encontrado = arbol.buscar(arbol.raiz, valor);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("encontrado", encontrado);
+        response.put("explicacion", arbol.getExplicacion().replace("\\n", "\n"));
+        return response;
+    }
+
+    @PostMapping("/reiniciar")
+    public Map<String, Object> reiniciar() {
+        arbol = new ArbolAVL(); 
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("mensaje", "Árbol AVL reiniciado correctamente");
+        response.put("arbol", null);
+        response.put("explicacion", "El árbol ha sido limpiado.");
+        return response;
+    }
+
+
+
 }

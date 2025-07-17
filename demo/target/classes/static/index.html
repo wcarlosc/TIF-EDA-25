@@ -3,17 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Simulador de Árboles</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2em; }
-        h1 { margin-top: 0; }
-        .menu-arboles { margin-bottom: 12px; }
-        .menu-arboles button { font-size: 1em; margin-right: 4px; cursor: pointer; }
-        .menu-arboles button.active { font-weight: bold; }
-        input, button { font-size: 1em; margin: 0.2em; }
-        #arbol { white-space: pre; font-family: monospace; background: #eee; padding: 1em; border-radius: 8px; }
-        #explicacion { margin-top: 1em; font-weight: bold; }
-        #svg-container { margin-top: 2em; }
-    </style>
+    <link rel="stylesheet" href="css.css">
+    
 </head>
 <body>
     <h1>Simulador de Árbol Binario</h1>
@@ -26,14 +17,21 @@
     <input id="valor" type="number" placeholder="Valor">
     <button onclick="insertar()">Insertar</button>
     <button onclick="eliminar()">Eliminar</button>
-    <div id="explicacion"></div>
-    <div id="arbol"></div>
-    <div id="svg-container">
+    <button onclick="buscar()">Buscar</button>
+    <button onclick="limpiar()">Limpiar</button>
+    <div id="explicacion" style="margin-top: 10px;"></div>
+    <div>
+        <label><strong>Recorrido Inorden:</strong></label>
+        <div id="arbol"></div>
+    </div>
+
+    
+    <div id="svg-container" style="margin-top: 10px;">
         <svg id="arbol-svg" width="800" height="320"></svg>
     </div>
 
 <script>
-let endpointBase = '/arbol';
+let endpointBase = '/arbol'
 let tipoArbol = 'arbol';
 
 function cambiarArbol(nombre) {
@@ -73,6 +71,52 @@ async function eliminar() {
     });
     cargarArbol();
 }
+async function buscar() {
+    const valor = document.getElementById('valor').value;
+    if (!valor) return alert("Ingresa un valor");
+    
+    try {
+        const res = await fetch(endpointBase + '/buscar/' + parseInt(valor));
+        const data = await res.json();
+        
+        // Mostrar explicación
+        document.getElementById('explicacion').textContent = data.explicacion;
+        
+        // Mostrar resultado de búsqueda
+        const mensaje = data.encontrado ? 
+            `✓ Valor ${valor} encontrado en el árbol` : 
+            `✗ Valor ${valor} no encontrado en el árbol`;
+        
+        // Agregar mensaje al elemento de explicación
+        document.getElementById('explicacion').textContent =  data.explicacion;
+        
+        // Para Splay Tree, actualizar la visualización del árbol ya que se modifica
+        if (tipoArbol === 'arbol-splay' && data.arbol) {
+            document.getElementById('arbol').textContent = dibujarTexto(data.arbol, 0);
+            dibujarSVG(data.arbol, tipoArbol);
+        }
+        
+    } catch (error) {
+        console.error('Error al buscar:', error);
+        alert('Error al realizar la búsqueda');
+    }
+}
+async function limpiar() {
+    try {
+        await fetch(endpointBase + '/reiniciar', {
+            method: 'POST'
+        });
+        document.getElementById('valor').value = '';
+        document.getElementById('explicacion').textContent = '';
+        document.getElementById('arbol').textContent = '';
+        document.getElementById('arbol-svg').innerHTML = '';
+        cargarArbol(); // En caso tu backend retorne el árbol vacío
+    } catch (e) {
+        console.error("Error al limpiar:", e);
+        alert("No se pudo limpiar el árbol.");
+    }
+}
+
 
 async function cargarArbol() {
     const res = await fetch(endpointBase);
@@ -266,8 +310,8 @@ function dibujarSVGB(raiz) {
         rect.setAttribute("ry", 6);
         rect.setAttribute("width", nodo._w);
         rect.setAttribute("height", 32);
-        rect.setAttribute("fill", "#ffe8ba");
-        rect.setAttribute("stroke", "#e8a036");
+        rect.setAttribute("fill", "#3a86ff");
+        rect.setAttribute("stroke", "#222"); 
         rect.setAttribute("stroke-width", "2");
         svg.appendChild(rect);
 
@@ -289,7 +333,8 @@ function dibujarSVGB(raiz) {
     drawNodes(raiz);
 }
 
-window.onload = cargarArbol;
+window.onload = () => cambiarArbol('arbol');
+
 </script>
 </body>
 </html>

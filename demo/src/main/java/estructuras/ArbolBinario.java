@@ -35,6 +35,23 @@ public class ArbolBinario {
         }
         return nodo;
     }
+    public boolean buscar(int valor) {
+    boolean encontrado = buscarRec(raiz, valor);
+        if (encontrado) {
+            ultimaOperacion = "Valor " + valor + " encontrado en el árbol.";
+        } else {
+            ultimaOperacion = "Valor " + valor + " no encontrado.";
+        }
+        return encontrado;
+    }
+
+    private boolean buscarRec(Nodo nodo, int valor) {
+        if (nodo == null) return false;
+        if (valor == nodo.valor) return true;
+        if (valor < nodo.valor) return buscarRec(nodo.izquierdo, valor);
+        else return buscarRec(nodo.derecho, valor);
+    }
+
 
     private int minValor(Nodo nodo) {
         int minv = nodo.valor;
