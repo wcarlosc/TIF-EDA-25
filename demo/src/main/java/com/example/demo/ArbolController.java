@@ -11,7 +11,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/arbol")
 public class ArbolController {
-    // Creamos una instancia global del árbol binario
+    
     private ArbolBinario arbol = new ArbolBinario();
 
     @PostMapping("/insertar")
@@ -42,8 +42,6 @@ public class ArbolController {
         response.put("explicacion", "El árbol ha sido limpiado.");
         return response;
     }
-
-    
 
     @GetMapping
     public Map<String, Object> obtenerArbol() {

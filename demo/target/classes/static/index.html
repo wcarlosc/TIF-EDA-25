@@ -14,6 +14,11 @@
         <button id="btn-splay" onclick="cambiarArbol('arbol-splay')">Splay Tree</button>
         <button id="btn-b" onclick="cambiarArbol('arbol-b')">Árbol B</button>
     </div>
+    
+    <div id="input-grado-container" class="controls">
+    <input id="grado-arbol-b" type="number" min="2" placeholder="Grado del Árbol B">
+    <button onclick="establecerGrado()">Establecer Grado</button>
+    </div>
     <input id="valor" type="number" placeholder="Valor">
     <button onclick="insertar()">Insertar</button>
     <button onclick="eliminar()">Eliminar</button>
@@ -41,6 +46,14 @@ function cambiarArbol(nombre) {
     document.getElementById('btn-' + (nombre === 'arbol' ? 'arbol' : nombre.replace('arbol-', ''))).classList.add('active');
     document.getElementById('valor').value = '';
     cargarArbol();
+
+    const inputGrado = document.getElementById("input-grado-container");
+    if (nombre === "arbol-b") {
+        inputGrado.style.display = "flex"; 
+    } else {
+        inputGrado.style.display = "none";
+    }
+
     // Cambia el título según selección
     let title = "Simulador de ";
     if(nombre==="arbol") title += "Árbol Binario";
@@ -48,6 +61,7 @@ function cambiarArbol(nombre) {
     else if(nombre==="arbol-splay") title += "Splay Tree";
     else if(nombre==="arbol-b") title += "Árbol B";
     document.querySelector("h1").innerText = title;
+
 }
 
 async function insertar() {
@@ -115,6 +129,33 @@ async function limpiar() {
         console.error("Error al limpiar:", e);
         alert("No se pudo limpiar el árbol.");
     }
+}
+function establecerGrado() {
+  const input = document.getElementById("grado-arbol-b");
+  const grado = parseInt(input.value);
+  
+  if (isNaN(grado) || grado < 2) {
+    alert("Por favor, ingrese un grado válido (mínimo 2).");
+    return;
+  }
+
+  fetch("http://localhost:8080/arbol-b/grado", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ grado: grado })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert("Error: " + data.error);
+    } else {
+      alert("Grado establecido a " + data.grado);
+    }
+  })
+  .catch(err => {
+    console.error("Error al establecer grado:", err);
+    alert("Ocurrió un error en la conexión con el backend.");
+  });
 }
 
 

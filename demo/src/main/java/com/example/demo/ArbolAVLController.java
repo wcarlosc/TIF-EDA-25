@@ -7,7 +7,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/arbol-avl")
 
-@CrossOrigin // Permite llamadas desde tu frontend local
+@CrossOrigin
 public class ArbolAVLController {
     private ArbolAVL arbol = new ArbolAVL();
 

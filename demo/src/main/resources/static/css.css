@@ -190,7 +190,7 @@ line {
   stroke-width: 2px;
 }
 
-/* Animaciones */
+
 @keyframes fadeInBody {
   0% { opacity: 0; background-color: #000; }
   100% { opacity: 1; background-color: var(--bg-dark); }
@@ -221,4 +221,10 @@ line {
   input[type="number"] {
     width: 100%;
   }
+}
+
+#input-grado-container {
+  position: fixed;
+  right: 20px; 
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
 }

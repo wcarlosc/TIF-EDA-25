@@ -54,5 +54,24 @@ public class ArbolBController {
         response.put("explicacion", "El árbol ha sido limpiado.");
         return response;
     }
+    private boolean gradoEstablecido = false;
+    @PostMapping("/grado")
+    public Map<String, Object> setGrado(@RequestBody Map<String, Integer> body) {
+        int grado = body.get("grado");
+        System.out.println(grado);
+        if (grado < 2) {
+            return Map.of(
+                "error", "El grado mínimo permitido es 2"
+            );
+        }
+        arbol = new ArbolB();
+        arbol.t = grado;
+        gradoEstablecido = true;
+
+        return Map.of(
+            "mensaje", "Grado establecido a " + grado,
+            "grado", grado
+        );
+    }
 
 }
