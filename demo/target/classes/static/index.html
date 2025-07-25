@@ -15,11 +15,12 @@
         <button id="btn-b" onclick="cambiarArbol('arbol-b')">Árbol B</button>
     </div>
     
-    <div id="input-grado-container" class="controls">
-    <input id="grado-arbol-b" type="number" min="2" placeholder="Grado del Árbol B">
-    <button onclick="establecerGrado()">Establecer Grado</button>
+    <div id="input-grado-container" >
+        <label for="grado-arbol-b"></label>
+        <input id="grado-arbol-b" type="number" min="2" placeholder="Grado del Árbol B" value="2" style="margin-right: 5px;">
+        <button onclick="establecerGrado()">Grado</button>
     </div>
-    <input id="valor" type="number" placeholder="Valor">
+    <input id="valor" type="number" placeholder="Valor" style="margin-top: 10px; margin-bottom: 10px;">
     <button onclick="insertar()">Insertar</button>
     <button onclick="eliminar()">Eliminar</button>
     <button onclick="buscar()">Buscar</button>

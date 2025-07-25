@@ -15,13 +15,13 @@ public class ArbolSplay {
         if (key < root.valor) {
             if (root.izquierdo == null) return root;
 
-            // Zig-Zig (Left Left)
+            // Zig-Zig 
             if (key < root.izquierdo.valor) {
                 root.izquierdo.izquierdo = splay(root.izquierdo.izquierdo, key);
                 root = rotacionDerecha(root);
                 explicacion.append("Rotación derecha (zig-zig) en ").append(root.valor).append("\\n");
             }
-            // Zig-Zag (Left Right)
+            // Zig-Zag 
             else if (key > root.izquierdo.valor) {
                 root.izquierdo.derecho = splay(root.izquierdo.derecho, key);
                 if (root.izquierdo.derecho != null)
@@ -33,13 +33,13 @@ public class ArbolSplay {
         else {
             if (root.derecho == null) return root;
 
-            // Zag-Zig (Right Left)
+            // Zag-Zig
             if (key < root.derecho.valor) {
                 root.derecho.izquierdo = splay(root.derecho.izquierdo, key);
                 if (root.derecho.izquierdo != null)
                     root.derecho = rotacionDerecha(root.derecho);
             }
-            // Zag-Zag (Right Right)
+            // Zag-Zag 
             else if (key > root.derecho.valor) {
                 root.derecho.derecho = splay(root.derecho.derecho, key);
                 root = rotacionIzquierda(root);
@@ -63,7 +63,6 @@ public class ArbolSplay {
         return y;
     }
 
-    // Insertar valor
     public NodoSplay insertar(NodoSplay root, int key) {
         if (root == null) {
             explicacion.append("Insertado el valor ").append(key).append("\\n");
@@ -88,7 +87,6 @@ public class ArbolSplay {
         return nuevo;
     }
 
-    // Eliminar valor
     public NodoSplay eliminar(NodoSplay root, int key) {
         if (root == null) {
             explicacion.append("Valor no encontrado: ").append(key).append("\\n");
@@ -109,6 +107,7 @@ public class ArbolSplay {
             return temp;
         }
     }
+
     public boolean buscar(int key) {
         if (raiz == null) {
             explicacion.append("El árbol está vacío.\n");

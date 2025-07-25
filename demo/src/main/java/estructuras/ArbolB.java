@@ -4,7 +4,7 @@ import java.util.*;
 
 public class ArbolB {
     public NodoB raiz;
-    public int t = 2; // Mínimo grado (orden). t=2 es B-tree de orden 2 (máximo 3 claves por nodo).
+    public int t = 2;
     public StringBuilder explicacion = new StringBuilder();
 
     public ArbolB() {
